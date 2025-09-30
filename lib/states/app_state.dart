@@ -5,12 +5,17 @@
 import 'package:flutter/material.dart';
 
 class AppState extends ChangeNotifier {
-  String loginMethod = "phone"; // 현재 로그인 방식 ("phone" 또는 "email")
-  String? selectedCarrier; // 통신사 선택 값
-  bool isAuthRequested = false; // 인증 요청 여부
-
+  // 🔹 상태 변수들
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController authController = TextEditingController();
+  
+  String? selectedCarrier; // 통신사 선택 값
+  String loginMethod = "phone"; // 현재 로그인 방식 ("phone" 또는 "email")
+  bool isAuthRequested = false; // 인증 요청 여부
+
+
+  String? selectedDomain; // 선택된 도메인
+
 
   // 휴대폰/이메일 입력 변경 시 상태 갱신
   void onPhoneChanged(String value) {
@@ -23,12 +28,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 인증 요청 버튼 클릭 시
-  void onRequestAuth() {
-    isAuthRequested = true;
-    notifyListeners();
-  }
-
   // 로그인 방식(phone <-> email) 전환
   void onSwitchMethod() {
     loginMethod = loginMethod == "phone" ? "email" : "phone";
@@ -37,6 +36,63 @@ class AppState extends ChangeNotifier {
     selectedCarrier = null;
     isAuthRequested = false;
     notifyListeners();
+  }
+
+  // 👉 인증 요청 함수 (백엔드로 전송)
+  Future<void> onRequestAuth({
+    String? selectedDomain,
+    bool isCustomDomain = false,
+    TextEditingController? customDomainController,
+  }) async {
+    Map<String, dynamic> payload = {};
+
+    if (loginMethod == "phone") {
+      // 전화번호 모드
+      String phoneText = phoneController.text.replaceAll("-", "");
+      if (phoneText.length < 10 || selectedCarrier == null) {
+        debugPrint("❌ 전화번호/통신사 입력 오류");
+        return;
+      }
+
+      payload = {
+        "type": "phone",
+        "phone": phoneText,
+        "carrier": selectedCarrier,
+      };
+    } else {
+      // 이메일 모드
+      String id = phoneController.text.trim();
+      String domain = isCustomDomain
+          ? customDomainController?.text.trim() ?? ""
+          : (selectedDomain ?? "");
+
+      if (id.isEmpty || domain.isEmpty) {
+        debugPrint("❌ 이메일 입력 오류");
+        return;
+      }
+
+      payload = {
+        "type": "email",
+        "email": "$id@$domain",
+      };
+    }
+
+    debugPrint("📤 서버 전송 데이터: $payload");
+
+    try {
+      // 예: http 요청
+      // final response = await http.post(
+      //   Uri.parse("https://example.com/auth/request"),
+      //   headers: {"Content-Type": "application/json"},
+      //   body: jsonEncode(payload),
+      // );
+      // debugPrint("✅ 서버 응답: ${response.body}");
+
+      isAuthRequested = true;
+      notifyListeners();
+    } catch (e) {
+      debugPrint("❌ 서버 요청 실패: $e");
+    }
   }
 
   @override

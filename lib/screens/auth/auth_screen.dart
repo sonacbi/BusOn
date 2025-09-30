@@ -6,40 +6,9 @@ import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/text_styles.dart';
 import '../../states/app_state.dart';
+import 'auth_widget.dart';
 
 import 'package:flutter/services.dart';
-
-
-class PhoneNumberFormatter extends TextInputFormatter { // 핸드폰 자동 포맷팅 전용 함수
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-  ) {
-    // 입력값에서 숫자만 남김
-    String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
-
-    // 길이에 따라 하이픈 추가
-    String formatted = '';
-    if (digits.length <= 3) {
-      formatted = digits;
-    } else if (digits.length <= 7) {
-      formatted = '${digits.substring(0, 3)}-${digits.substring(3)}';
-    } else if (digits.length <= 11) {
-      formatted =
-          '${digits.substring(0, 3)}-${digits.substring(3, 7)}-${digits.substring(7)}';
-    } else {
-      // 11자리 이상 잘라내기
-      formatted =
-          '${digits.substring(0, 3)}-${digits.substring(3, 7)}-${digits.substring(7, 11)}';
-    }
-
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
-}
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -62,6 +31,14 @@ class _AuthScreenState extends State<AuthScreen>
   TextEditingController customDomainController = TextEditingController();
   bool isCustomDomain = false; // 직접입력 선택 여부
   String? selectedDomain; // 선택된 도메인
+
+  bool showAuthField = false;// 인증번호 입력창 (조건별 표시)
+  void setShowAuthField(bool val) {
+    setState(() { showAuthField = val; // showAuthField가 true로 바뀌었을 때만 버튼 위치 재계산
+      final appState = Provider.of<AppState>(context, listen: false);
+      if (showAuthField) { WidgetsBinding.instance.addPostFrameCallback((_) { _updateAuthButtonPosition(); }); } else { appState.isAuthRequested = false; }
+    });
+  }
 
   @override
     void initState() {
@@ -118,8 +95,6 @@ class _AuthScreenState extends State<AuthScreen>
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
 
-    bool showAuthField = false;// 인증번호 입력창 (조건별 표시)
-
     // ① 버튼 위치 계산 (build 시작 직후)
     double buttonTop = 0;
     if (showAuthField && _authFieldKey.currentContext != null) {
@@ -132,26 +107,13 @@ class _AuthScreenState extends State<AuthScreen>
 
     if (appState.loginMethod == "phone") {
       // 전화번호 11자리 이상 + 통신사 선택 시
-      if ((appState.phoneController.text.replaceAll('-', '').length >= 11) &&
-          appState.selectedCarrier != null) {
-        showAuthField = true;
-        // showAuthField가 true가 됐으니 버튼 위치 재계산
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _updateAuthButtonPosition();
-        });
-      }
+      if ((appState.phoneController.text.replaceAll('-', '').length >= 11) && appState.selectedCarrier != null) { setShowAuthField(true); }
     } else {
       // 이메일 모드: 아이디 1자 이상 + 도메인 1자 이상
       String domainText = isCustomDomain
           ? customDomainController.text
           : (selectedDomain ?? "");
-      if (appState.phoneController.text.isNotEmpty && domainText.isNotEmpty) {
-        showAuthField = true;
-        // showAuthField가 true가 됐으니 버튼 위치 재계산
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _updateAuthButtonPosition();
-        });
-      }
+      if (appState.phoneController.text.isNotEmpty && domainText.isNotEmpty) { setShowAuthField(true); } else { setShowAuthField(false);}
     }
 
     return Scaffold(
@@ -175,197 +137,47 @@ class _AuthScreenState extends State<AuthScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 화면 제목 + 로그인 방식 전환 버튼
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              appState.loginMethod == "phone"
-                                  ? "휴대폰 로그인"
-                                  : "이메일 로그인",
-                              style: TextStyles.title,
-                            ),
-                            ElevatedButton(
-                              onPressed: appState.phoneController.text.isEmpty
-                                  ? () {
-                                      appState.onSwitchMethod();
-                                      setState(() {
-                                        isCustomDomain = false;
-                                        selectedDomain = null;
-                                        customDomainController.clear();
-                                      });
-                                    }
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: appState.phoneController.text.isEmpty
-                                    ? AppColors.buttonActiveColor
-                                    : AppColors.buttonDisabledColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    appState.loginMethod == "phone" ? "이메일" : "휴대폰",
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  const Icon(Icons.autorenew, size: 18, color: Colors.white),
-                                ],
-                              ),
-                            ),
-                          ],
+                        AuthHeader(
+                          loginMethod: appState.loginMethod,
+                          isPhoneEmpty: appState.phoneController.text.isEmpty,
+                          onSwitchMethod: () {
+                            appState.onSwitchMethod();
+                            setState(() {
+                              isCustomDomain = false;
+                              selectedDomain = null;
+                              customDomainController.clear();
+                              setShowAuthField(false);
+                            });
+                          },
                         ),
 
                         const SizedBox(height: 20),
 
                         // 인증 수단 입력창
-                        if (appState.loginMethod == "email") ...[
-                          // 이메일 모드 입력
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  focusNode: idFocus,
-                                  controller: appState.phoneController,
-                                  decoration: const InputDecoration(
-                                    labelText: "아이디",
-                                    hintText: "example",
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: isCustomDomain
-                                    ? TextField(
-                                        focusNode: customDomainFocus,
-                                        controller: customDomainController,
-                                        decoration: const InputDecoration(
-                                          labelText: "도메인 입력",
-                                          hintText: "example.com",
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        onChanged: (val) {
-                                          if (val.isEmpty && !customDomainFocus.hasFocus) return;
-                                          if (val.isEmpty) {
-                                            setState(() {
-                                              isCustomDomain = false;
-                                              selectedDomain = null;
-                                            });
-                                            Future.microtask(() => idFocus.requestFocus());
-                                          }
-                                        },
-                                      )
-                                    : DropdownButtonFormField<String>(
-                                        value: selectedDomain,
-                                        decoration: const InputDecoration(
-                                          labelText: "도메인",
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        items: [
-                                          "gmail.com", "naver.com", "daum.net", "hanmail.net",
-                                          "kakao.com", "hotmail.com", "outlook.com", "yahoo.com", "icloud.com", "직접입력"
-                                        ].map((e) => DropdownMenuItem(
-                                              value: e,
-                                              child: Text(e),
-                                            )).toList(),
-                                        onChanged: (val) {
-                                          if (val == "직접입력") {
-                                            setState(() {
-                                              isCustomDomain = true;
-                                              selectedDomain = null;
-                                            });
-                                            Future.microtask(() => customDomainFocus.requestFocus());
-                                          } else {
-                                            setState(() {
-                                              isCustomDomain = false;
-                                              selectedDomain = val;
-                                            });
-                                          }
-                                        },
-                                      ),
-                              ),
-                            ],
-                          )
-                        ] else ...[
-                          // 핸드폰 모드 입력
-                          TextField(
-                            controller: appState.phoneController,
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [PhoneNumberFormatter()],
-                            decoration: const InputDecoration(
-                              labelText: "휴대폰 번호",
-                              hintText: "000-0000-0000",
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: appState.onPhoneChanged,
-                          ),
-                          if (appState.loginMethod == "phone" &&
-                              appState.phoneController.text.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            DropdownButtonFormField<String>(
-                              value: appState.selectedCarrier,
-                              decoration: const InputDecoration(
-                                labelText: "통신사 선택",
-                                border: OutlineInputBorder(),
-                              ),
-                              items: ["SKT", "KT", "LG"]
-                                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                                  .toList(),
-                              onChanged: (val) {
-                                appState.onCarrierSelected(val!);
-                                _buttonAnimationController.forward();
-                              },
-                            ),
-                          ],
-                        ],
+                        AuthInputField(
+                          appState: appState,
+                          isCustomDomain: isCustomDomain,
+                          customDomainController: customDomainController,
+                          idFocus: idFocus,
+                          customDomainFocus: customDomainFocus,
+                          setCustomDomain: (val) {
+                            setState(() {
+                              isCustomDomain = val;
+                              if (!val) selectedDomain = appState.selectedDomain;
+                            });
+                          },
+                          selectedDomain: selectedDomain,
+                          setSelectedDomain: (val) => setState(() { selectedDomain = val; }),
+                          setShowAuthField: (val) => setState(() { showAuthField = val; }),
+                        ),
 
-                        if (showAuthField) ...[
-                          const SizedBox(height: 10),
-                          Stack(
-                            children: [
-                              TextField(
-                                key: _authFieldKey, // key 추가
-                                controller: appState.authController,
-                                maxLength: 6,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: "인증번호 6자리 입력",
-                                  border: OutlineInputBorder(),
-                                  counterText: "",
-                                  contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                                ),
-                                onChanged: (_) {
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    _updateAuthButtonPosition();
-                                  });
-                                },
-                              ),
-                              Positioned(
-                                right: 8,
-                                top: 12,
-                                bottom: 12,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange.shade100,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    appState.isAuthRequested ? "03:00" : "재요청",
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-                                  ),
-                                ),
-                              ),
-                            ],
+                        // 인증 번호 입력창
+                        if (showAuthField)
+                          AuthCodeField(
+                            appState: appState,
+                            authFieldKey: _authFieldKey,
+                            updateButtonPosition: _updateAuthButtonPosition,
                           ),
-                        ],
-
 
                         const Spacer(),
                       ],
@@ -376,121 +188,29 @@ class _AuthScreenState extends State<AuthScreen>
             ),
 
             // 하단 버튼 영역 고정
-              // 인증 버튼
-              AnimatedBuilder(
-                animation: Listenable.merge([appState.authController]),
-                builder: (context, _) {
-                // 여기서 버튼 활성화 여부 계산
-                bool isButtonEnabled = false;
+            // 인증 버튼
+            AuthActionButton(
+              appState: appState,
+              showAuthField: showAuthField,
+              isCustomDomain: isCustomDomain,
+              selectedDomain: selectedDomain,
+              customDomainController: customDomainController,
+              topPosition: topPosition,
+            ),
 
-                if (appState.loginMethod == "phone") {
-                  String phoneText = appState.phoneController.text.replaceAll('-', '');
-                  isButtonEnabled =
-                      phoneText.length >= 11 && appState.selectedCarrier != null;
-                } else {
-                  String domainText = isCustomDomain
-                      ? customDomainController.text
-                      : (selectedDomain ?? "");
-                  isButtonEnabled = appState.phoneController.text.isNotEmpty &&
-                      domainText.isNotEmpty;
-                }
-                  return Positioned(
-                    left: 0,
-                    right: 0,
-                    top: topPosition,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (child, animation) {
-                        final offsetAnimation = Tween<Offset>(
-                          begin: const Offset(0, 0.5),
-                          end: Offset.zero,
-                        ).animate(animation);
-                        return SlideTransition(position: offsetAnimation, child: child);
-                      },
-                      child: showAuthField
-                          ? SizedBox(
-                              key: const ValueKey('authButton'),
-                              width: MediaQuery.of(context).size.width,
-                              child: Builder(
-                                builder: (context) {
-                                  bool isButtonEnabled = false;
+            // 하단 토글 버튼 (항상 고정)
+            AuthSwitchButton(
+              appState: appState,
+              onResetFields: () {
+                setState(() {
+                  isCustomDomain = false;
+                  selectedDomain = null;
+                  customDomainController.clear();
+                  showAuthField = false;
+                });
+              },
+            ),
 
-                                  if (appState.loginMethod == "phone") {
-                                    String phoneText =
-                                        appState.phoneController.text.replaceAll('-', '');
-                                    isButtonEnabled =
-                                        phoneText.length >= 11 && appState.selectedCarrier != null;
-                                  } else {
-                                    String domainText = isCustomDomain
-                                        ? customDomainController.text
-                                        : (selectedDomain ?? "");
-                                    isButtonEnabled = appState.phoneController.text.isNotEmpty &&
-                                        domainText.isNotEmpty;
-                                  }
-
-                                  return ElevatedButton(
-                                    onPressed: isButtonEnabled ? appState.onRequestAuth : null,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isButtonEnabled
-                                          ? AppColors.buttonActiveColor
-                                          : AppColors.buttonDisabledColor,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 16),
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.zero,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      appState.isAuthRequested ? "로그인하기" : "인증하기",
-                                      style: const TextStyle(fontSize: 16),
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  );
-                },
-              ),
-
-        // 하단 UX 버튼 (항상 고정)
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 10),
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: TextButton.icon(
-                  onPressed: () {
-                    appState.onSwitchMethod();
-                    setState(() {
-                      isCustomDomain = false;
-                      selectedDomain = null;
-                      customDomainController.clear();
-                      // TextField가 나타나면 버튼 위치 업데이트
-                      if (showAuthField) {
-                        // 렌더 후 위치 계산
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _updateAuthButtonPosition();
-                        });
-                      }
-                    });
-                  },
-                  icon: const Icon(Icons.autorenew, size: 18),
-                  label: Text(
-                    appState.loginMethod == "phone" ? "이메일 로그인" : "휴대폰 로그인",
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
           ],
         ),
       ),
