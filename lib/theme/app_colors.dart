@@ -5,9 +5,21 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primaryColor = Color(0xFF4A90E2);
+  // 메인 오렌지 컬러 (r255 g149 b73)
+  static const primaryColor = Color.fromRGBO(255, 149, 73, 1);
+
+  // 화면 배경
   static const backgroundColor = Color(0xFFF5F5F5);
+
+  // 텍스트
   static const textColor = Color(0xFF333333);
+
+  // 비활성화 요소
   static const disabledColor = Colors.grey;
-  static const buttonColor = Color(0xFF4A90E2);
+
+  // 버튼 (파란색 계열: #4A90E2)
+  static const buttonActiveColor = Color(0xFF4A90E2);
+
+  // 버튼 비활성화 (연한 회색)
+  static const buttonDisabledColor = Colors.grey;
 }
