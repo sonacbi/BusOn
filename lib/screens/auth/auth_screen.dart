@@ -1,10 +1,11 @@
 // 03
 // screens > auth > auth_screen.dart
-// 로그인 및 회원가입 등 인증 관련 화면
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/text_styles.dart';
+import '../../states/app_state.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -13,72 +14,36 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
-  String loginMethod = "phone"; // 현재 로그인 방식 ("phone" 또는 "email")
-  TextEditingController phoneController = TextEditingController(); // 휴대폰/이메일 입력 컨트롤러
-  TextEditingController authController = TextEditingController();  // 인증번호 입력 컨트롤러
-  String? selectedCarrier; // 통신사 선택 값
-  bool isAuthRequested = false; // 인증 요청 여부
-  late AnimationController _buttonAnimationController; // 버튼 애니메이션 컨트롤러
-  late Animation<double> _buttonAnimation; // 버튼 애니메이션 효과
+class _AuthScreenState extends State<AuthScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _buttonAnimationController;
+  late Animation<double> _buttonAnimation;
 
   @override
   void initState() {
     super.initState();
-    // 버튼 애니메이션 초기화
     _buttonAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _buttonAnimation = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
-      parent: _buttonAnimationController,
-      curve: Curves.easeOut,
-    ));
+    _buttonAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _buttonAnimationController,
+        curve: Curves.easeOut,
+      ),
+    );
   }
 
   @override
   void dispose() {
-    // 컨트롤러 해제
-    phoneController.dispose();
-    authController.dispose();
     _buttonAnimationController.dispose();
     super.dispose();
   }
 
-  // 휴대폰/이메일 입력 변경 시 상태 갱신
-  void onPhoneChanged(String value) {
-    setState(() {});
-  }
-
-  // 통신사 선택 시 애니메이션 실행
-  void onCarrierSelected(String carrier) {
-    setState(() {
-      selectedCarrier = carrier;
-      _buttonAnimationController.forward();
-    });
-  }
-
-  // 인증 요청 버튼 클릭 시
-  void onRequestAuth() {
-    setState(() {
-      isAuthRequested = true;
-    });
-  }
-
-  // 로그인 방식(phone <-> email) 전환
-  void onSwitchMethod() {
-    setState(() {
-      loginMethod = loginMethod == "phone" ? "email" : "phone";
-      phoneController.clear(); // 입력 초기화
-      authController.clear();
-      selectedCarrier = null;
-      isAuthRequested = false;
-      _buttonAnimationController.reset(); // 애니메이션 리셋
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -88,7 +53,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               height: 60,
               color: AppColors.primaryColor,
               alignment: Alignment.center,
-              child: Text("앱 로고", style: TextStyles.title.copyWith(color: Colors.white)),
+              child: Text("앱 로고",
+                  style: TextStyles.title.copyWith(color: Colors.white)),
             ),
 
             // 본문 영역
@@ -103,15 +69,19 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          loginMethod == "phone" ? "휴대폰 로그인" : "이메일 로그인",
+                          appState.loginMethod == "phone"
+                              ? "휴대폰 로그인"
+                              : "이메일 로그인",
                           style: TextStyles.title,
                         ),
                         TextButton(
-                          onPressed: phoneController.text.isEmpty ? onSwitchMethod : null,
+                          onPressed: appState.phoneController.text.isEmpty
+                              ? appState.onSwitchMethod
+                              : null,
                           child: Text(
                             "이메일로 로그인",
                             style: TextStyles.body.copyWith(
-                              color: phoneController.text.isEmpty
+                              color: appState.phoneController.text.isEmpty
                                   ? AppColors.primaryColor
                                   : AppColors.disabledColor,
                             ),
@@ -124,36 +94,42 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
                     // 휴대폰 번호 / 이메일 입력창
                     TextField(
-                      controller: phoneController,
+                      controller: appState.phoneController,
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
-                        labelText: loginMethod == "phone" ? "휴대폰 번호" : "이메일",
+                        labelText: appState.loginMethod == "phone"
+                            ? "휴대폰 번호"
+                            : "이메일",
                         border: const OutlineInputBorder(),
                       ),
-                      onChanged: onPhoneChanged,
+                      onChanged: appState.onPhoneChanged,
                     ),
 
                     // 휴대폰 번호 입력 시 통신사 선택 가능
-                    if (phoneController.text.isNotEmpty) ...[
+                    if (appState.phoneController.text.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       DropdownButtonFormField<String>(
-                        value: selectedCarrier,
+                        value: appState.selectedCarrier,
                         decoration: const InputDecoration(
                           labelText: "통신사 선택",
                           border: OutlineInputBorder(),
                         ),
                         items: ["SKT", "KT", "LG"]
-                            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                            .map((e) =>
+                                DropdownMenuItem(value: e, child: Text(e)))
                             .toList(),
-                        onChanged: (val) => onCarrierSelected(val!),
+                        onChanged: (val) {
+                          appState.onCarrierSelected(val!);
+                          _buttonAnimationController.forward();
+                        },
                       ),
                     ],
 
                     // 통신사 선택 후 인증번호 입력창 노출
-                    if (selectedCarrier != null) ...[
+                    if (appState.selectedCarrier != null) ...[
                       const SizedBox(height: 10),
                       TextField(
-                        controller: authController,
+                        controller: appState.authController,
                         maxLength: 6,
                         keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
@@ -162,7 +138,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(isAuthRequested ? "유효시간: 03:00" : ""),
+                      Text(appState.isAuthRequested ? "유효시간: 03:00" : ""),
                     ],
 
                     const Spacer(),
@@ -172,17 +148,20 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       sizeFactor: _buttonAnimation,
                       axisAlignment: -1.0,
                       child: ElevatedButton(
-                        onPressed: selectedCarrier != null ? onRequestAuth : null,
-                        child: Text(isAuthRequested ? "로그인하기" : "인증하기"),
+                        onPressed: appState.selectedCarrier != null
+                            ? appState.onRequestAuth
+                            : null,
+                        child: Text(
+                            appState.isAuthRequested ? "로그인하기" : "인증하기"),
                       ),
                     ),
 
                     // 이메일 로그인 전환 버튼 (추가 UX)
-                    if (phoneController.text.isNotEmpty)
+                    if (appState.phoneController.text.isNotEmpty)
                       Align(
                         alignment: Alignment.center,
                         child: TextButton(
-                          onPressed: onSwitchMethod,
+                          onPressed: appState.onSwitchMethod,
                           child: const Text("[이메일로 로그인(체인지)]"),
                         ),
                       ),

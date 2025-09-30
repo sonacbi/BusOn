@@ -1,6 +1,10 @@
 // 앱 실행과 라우팅(홈 화면 선택 등)만 담당
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Provider 패키지 추가
+
+// 상태 import
+import 'states/app_state.dart';
 
 // 테스트용 스크린 import
 import 'screens/intro/intro_screen.dart'; // 01. 앱 실행 시 보여지는 인트로 화면
@@ -9,7 +13,12 @@ import 'screens/auth/auth_screen.dart'; // 03. 로그인/회원가입 화면
 import 'screens/main/main_screen.dart'; // 04. 로그인 후 메인 화면
 
 void main() {
-  runApp(MyApp()); // 앱 실행
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AppState(), // 전역 상태 등록
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
