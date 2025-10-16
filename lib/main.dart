@@ -1,91 +1,73 @@
-// 앱 실행과 라우팅(홈 화면 선택 등)만 담당
-
 import 'package:flutter/material.dart';
-
-// 테스트용 스크린 import
-import 'screens/intro/intro_screen.dart'; // 01. 앱 실행 시 보여지는 인트로 화면
-import 'screens/select_language/select_language_screen.dart'; // 02. 언어 선택 화면
-import 'screens/auth/auth_screen.dart'; // 03. 로그인/회원가입 화면
-import 'screens/main/main_screen.dart'; // 04. 로그인 후 메인 화면
+import 'widgets/app_button.dart';
 
 void main() {
-  runApp(MyApp()); // 앱 실행
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '테스트용 스크린 이동',
-      home: HomeScreen(), // 앱 시작 시 보여줄 홈 화면
-    );
-  }
-}
+      home: Scaffold(
+        appBar: AppBar(title: const Text("Button Layout Example")),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // 첫 번째 행 (아이콘 위, 텍스트 아래)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  AppButton(
+                    text: "좌측 아이콘",
+                    icon: Icons.star, // 아이콘
+                    iconPosition: ButtonIconPosition.left, // 아이콘 위치(좌)
+                    color: Colors.blue, // 배경 색
+                    pressedColor: Colors.blueAccent, // 클릭시 배경 색
+                    textColor: Colors.white, // 텍스트 색
+                    width: 140, // 버튼 너비
+                    height: 50, // 버튼 높이
+                    textSize: 10, // 텍스트(폰트) 크기
+                    elevation: 6, // 그림자
+                    borderRadius: 12, // 모서리 둥글게
+                    onPressed: () {
+                      print("좌측 버튼 눌림");
+                    },
+                  ),
 
-// 홈 화면: 테스트용 버튼 4개로 각 스크린 이동
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+                  AppButton(
+                    text: "우측 아이콘",
+                    icon: Icons.favorite,
+                    iconPosition: ButtonIconPosition.right, // 우로 배치
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // 두 번째 행 (아이콘 위, 텍스트 아래)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  AppButton(
+                    text: "아이콘 위",
+                    icon: Icons.star,
+                    iconPosition: ButtonIconPosition.top, // 위로 배치
+                    onPressed: () {},
+                  ),
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('테스트용 화면 이동'), // 상단 제목 표시
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(20.0), // 화면 가장자리 여백
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // 버튼 세로 중앙 정렬
-          children: [
-            // 01. Intro Screen 버튼
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => IntroScreen()),
-                );
-              },
-              child: Text('01. Intro Screen'),
-            ),
-            SizedBox(height: 20), // 버튼 사이 간격
-
-            // 02. Select Language Screen 버튼
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => SelectLanguageScreen()),
-                );
-              },
-              child: Text('02. Select Language Screen'),
-            ),
-            SizedBox(height: 20),
-
-            // 03. Auth Screen 버튼
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => AuthScreen()),
-                );
-              },
-              child: Text('03. Auth Screen'),
-            ),
-            SizedBox(height: 20),
-
-            // 04. Main Screen 버튼
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => MainScreen()),
-                );
-              },
-              child: Text('04. Main Screen'),
-            ),
-          ],
+                  AppButton(
+                    text: "아이콘 아래",
+                    icon: Icons.settings,
+                    iconPosition: ButtonIconPosition.bottom, // 아래로 배치
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
