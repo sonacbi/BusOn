@@ -1,11 +1,12 @@
 // screens > auth > auth_widget.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/text_styles.dart';
 import '../../states/app_state.dart';
 import '../../utils/ui_helper.dart';
-
-import 'package:flutter/services.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/app_input.dart';
 
 class AuthHeader extends StatelessWidget {
   final String loginMethod; // "phone" 또는 "email"
@@ -28,29 +29,19 @@ class AuthHeader extends StatelessWidget {
           loginMethod == "phone" ? "휴대폰 로그인" : "이메일 로그인",
           style: TextStyles.title,
         ),
-        ElevatedButton(
-          onPressed: isPhoneEmpty ? onSwitchMethod : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                isPhoneEmpty ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                loginMethod == "phone" ? "이메일" : "휴대폰",
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 2),
-              const Icon(Icons.autorenew, size: 18, color: Colors.white),
-            ],
-          ),
-        ),
+        AppButton(
+          text: loginMethod == "phone" ? "이메일" : "휴대폰",
+          icon: Icons.autorenew,
+          iconPosition: ButtonIconPosition.right,
+          onPressed: isPhoneEmpty ? onSwitchMethod : () {},
+          color: isPhoneEmpty ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
+          pressedColor: AppColors.buttonActiveColor.withOpacity(0.8),
+          width: 110,
+          height: 40,
+          textSize: 14,
+          borderRadius: 5,
+          elevation: 2,
+        )
       ],
     );
   }
@@ -62,11 +53,10 @@ class AuthInputField extends StatelessWidget {
   final TextEditingController customDomainController;
   final FocusNode idFocus;
   final FocusNode customDomainFocus;
-  final String? selectedDomain; // 선택된 도메인
-  final Function(String?) setSelectedDomain; // 선택값 변경 콜백
-  final Function(bool) setCustomDomain; // isCustomDomain 변경 콜백
-  final Function(bool) setShowAuthField; // showauthfield 변경 콜백
-
+  final String? selectedDomain;
+  final Function(String?) setSelectedDomain;
+  final Function(bool) setCustomDomain;
+  final Function(bool) setShowAuthField;
 
   const AuthInputField({
     super.key,
@@ -84,31 +74,24 @@ class AuthInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (appState.loginMethod == "email") {
-      // 이메일 모드 입력
       return Row(
         children: [
           Expanded(
-            child: TextField(
+            child: AppInput(
               focusNode: idFocus,
               controller: appState.phoneController,
-              decoration: const InputDecoration(
-                labelText: "아이디",
-                hintText: "example",
-                border: OutlineInputBorder(),
-              ),
+              labelText: "아이디",
+              hintText: "example",
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: isCustomDomain
-                ? TextField(
+                ? AppInput(
                     focusNode: customDomainFocus,
                     controller: customDomainController,
-                    decoration: const InputDecoration(
-                      labelText: "도메인 입력",
-                      hintText: "example.com",
-                      border: OutlineInputBorder(),
-                    ),
+                    labelText: "도메인 입력",
+                    hintText: "example.com",
                     onChanged: (val) {
                       if (val.isEmpty && !customDomainFocus.hasFocus) return;
                       if (val.isEmpty) {
@@ -116,7 +99,6 @@ class AuthInputField extends StatelessWidget {
                         Future.microtask(() => idFocus.requestFocus());
                       }
 
-                      // 👉 입력값 바뀔 때마다 버튼 노출 조건 확인
                       String domainText = isCustomDomain
                           ? customDomainController.text
                           : (selectedDomain ?? "");
@@ -156,18 +138,14 @@ class AuthInputField extends StatelessWidget {
         ],
       );
     } else {
-      // 핸드폰 모드 입력
       return Column(
         children: [
-          TextField(
+          AppInput(
             controller: appState.phoneController,
             keyboardType: TextInputType.phone,
             inputFormatters: [PhoneNumberFormatter()],
-            decoration: const InputDecoration(
-              labelText: "휴대폰 번호",
-              hintText: "000-0000-0000",
-              border: OutlineInputBorder(),
-            ),
+            labelText: "휴대폰 번호",
+            hintText: "000-0000-0000",
             onChanged: appState.onPhoneChanged,
           ),
           if (appState.phoneController.text.isNotEmpty) ...[
@@ -209,12 +187,49 @@ class AuthCodeField extends StatefulWidget {
 }
 
 class _AuthCodeFieldState extends State<AuthCodeField> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.updateButtonPosition();
+  Timer? _timer;
+  int _seconds = 180; // 3분
+  bool _isTimerActive = false;
+
+  void _startTimer() {
+    _timer?.cancel();
+    setState(() {
+      _seconds = 180;
+      _isTimerActive = true;
     });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_seconds <= 0) {
+        timer.cancel();
+        setState(() => _isTimerActive = false);
+      } else {
+        setState(() => _seconds--);
+      }
+    });
+  }
+
+  void _onResend() {
+    // 재요청 로직
+    print("인증번호 재요청");
+
+    _startTimer();
+    widget.appState.onRequestAuth(
+      selectedDomain: null,
+      isCustomDomain: false,
+      customDomainController: TextEditingController(),
+    );
+  }
+
+  String _formatTime(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return "$m:$s";
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -222,43 +237,49 @@ class _AuthCodeFieldState extends State<AuthCodeField> {
     return Column(
       children: [
         const SizedBox(height: 10),
-        Stack(
-          children: [
-            TextField(
-              key: widget.authFieldKey,
-              controller: widget.appState.authController,
-              maxLength: 6,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "인증번호 6자리 입력",
-                border: OutlineInputBorder(),
-                counterText: "",
-                contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              ),
-              onChanged: (_) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  widget.updateButtonPosition();
-                });
-              },
-            ),
-            Positioned(
-              right: 8,
-              top: 12,
-              bottom: 12,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(4),
+        AppInput(
+          key: widget.authFieldKey,
+          controller: widget.appState.authController,
+          labelText: "인증번호 입력",
+          hintText: "6자리 숫자를 입력하세요",
+          borderRadius: 12,
+          fillColor: Colors.grey.shade100,
+          prefixIcon: Icon(Icons.confirmation_number, color: Colors.grey.shade600),
+          maxLength: 6,
+          counterText: "",
+          keyboardType: TextInputType.number,
+          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          suffixIcon: SizedBox(
+            width: 100,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    _isTimerActive ? _formatTime(_seconds) : "재요청",
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  widget.appState.isAuthRequested ? "03:00" : "재요청",
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                IconButton(
+                  icon: const Icon(Icons.refresh, size: 16),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  onPressed: _onResend,
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
+          onChanged: (_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              widget.updateButtonPosition();
+            });
+          },
         ),
       ],
     );
@@ -288,18 +309,15 @@ class AuthActionButton extends StatelessWidget {
     return AnimatedBuilder(
       animation: Listenable.merge([appState.authController]),
       builder: (context, _) {
-        // 버튼 활성화 여부 계산
         bool isButtonEnabled = false;
 
         if (appState.loginMethod == "phone") {
           String phoneText = appState.phoneController.text.replaceAll('-', '');
-          isButtonEnabled =
-              phoneText.length >= 11 && appState.selectedCarrier != null;
+          isButtonEnabled = phoneText.length >= 11 && appState.selectedCarrier != null;
         } else {
           String domainText =
               isCustomDomain ? customDomainController.text : (selectedDomain ?? "");
-          isButtonEnabled =
-              appState.phoneController.text.isNotEmpty && domainText.isNotEmpty;
+          isButtonEnabled = appState.phoneController.text.isNotEmpty && domainText.isNotEmpty;
         }
 
         return Positioned(
@@ -319,7 +337,8 @@ class AuthActionButton extends StatelessWidget {
                 ? SizedBox(
                     key: const ValueKey('authButton'),
                     width: MediaQuery.of(context).size.width,
-                    child: ElevatedButton(
+                    child: AppButton(
+                      text: appState.isAuthRequested ? "로그인하기" : "인증하기",
                       onPressed: isButtonEnabled
                           ? () {
                               appState.onRequestAuth(
@@ -328,21 +347,14 @@ class AuthActionButton extends StatelessWidget {
                                 customDomainController: customDomainController,
                               );
                             }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isButtonEnabled
-                            ? AppColors.buttonActiveColor
-                            : AppColors.buttonDisabledColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-                      child: Text(
-                        appState.isAuthRequested ? "로그인하기" : "인증하기",
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                          : () {},
+                      color: isButtonEnabled ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
+                      pressedColor: AppColors.buttonActiveColor.withOpacity(0.8),
+                      width: MediaQuery.of(context).size.width,
+                      height: 50,
+                      textSize: 16,
+                      borderRadius: 0,
+                      elevation: 0,
                     ),
                   )
                 : const SizedBox.shrink(),
@@ -378,7 +390,7 @@ class AuthSwitchButton extends StatelessWidget {
             child: TextButton.icon(
               onPressed: () {
                 appState.onSwitchMethod();
-                onResetFields(); // 화면 상태 초기화 콜백 실행
+                onResetFields();
               },
               icon: const Icon(Icons.autorenew, size: 18),
               label: Text(
