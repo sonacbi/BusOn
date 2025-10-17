@@ -34,13 +34,18 @@ class AuthHeader extends StatelessWidget {
           icon: Icons.autorenew,
           iconPosition: ButtonIconPosition.right,
           onPressed: isPhoneEmpty ? onSwitchMethod : () {},
-          color: isPhoneEmpty ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
+          color: isPhoneEmpty 
+            ? AppColors.buttonActiveColor 
+            : AppColors.buttonDisabledColor.withOpacity(0.4), // 연하게
           pressedColor: AppColors.buttonActiveColor.withOpacity(0.8),
-          width: 110,
-          height: 40,
+          width: 80,
+          height: 30,
           textSize: 14,
           borderRadius: 5,
           elevation: 2,
+          // ───────────── 내부 패딩 커스터마이징 ─────────────
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8), // 좌우 안쪽 여백 축소
+          iconSpacing: 4, // 텍스트와 아이콘 간격 줄임
         )
       ],
     );
@@ -146,6 +151,7 @@ class AuthInputField extends StatelessWidget {
             inputFormatters: [PhoneNumberFormatter()],
             labelText: "휴대폰 번호",
             hintText: "000-0000-0000",
+            prefixIcon: Icon(Icons.phone, color: Colors.grey.shade600), // 여기에 아이콘 추가
             onChanged: appState.onPhoneChanged,
           ),
           if (appState.phoneController.text.isNotEmpty) ...[

@@ -31,6 +31,10 @@ class AppButton extends StatelessWidget {
   final double borderRadius; // 모서리 둥글기
 
 
+/// 커스텀용 옵션 추가 (2025-10-17)
+final EdgeInsetsGeometry? contentPadding; // 버튼 내부 패딩
+final double iconSpacing; // 텍스트-아이콘 간격
+
 // ---------------------------------------------
 // 📌 생성자: 기본값 지정 + 필수 파라미터 설정
 // ---------------------------------------------
@@ -48,6 +52,8 @@ class AppButton extends StatelessWidget {
     required this.onPressed,
     this.elevation = 4.0,
     this.borderRadius = 8.0,
+    this.contentPadding, // 추가
+    this.iconSpacing = 8, // 추가
   });
 // ---------------------------------------------
 
@@ -68,7 +74,7 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: textSize, color: textColor),
-              const SizedBox(width: 8),
+              SizedBox(width: iconSpacing), // 텍스트-아이콘 간격 (수정)
               Text(text, style: TextStyle(fontSize: textSize, color: textColor)),
             ],
           );
@@ -79,7 +85,7 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(text, style: TextStyle(fontSize: textSize, color: textColor)),
-              const SizedBox(width: 8),
+              SizedBox(width: iconSpacing), // 텍스트-아이콘 간격 (수정)
               Icon(icon, size: textSize, color: textColor),
             ],
           );
@@ -90,7 +96,7 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: textSize, color: textColor),
-              const SizedBox(height: 4),
+              const SizedBox(height: 4), // 사이즈가 달라서 수정 없음
               Text(text, style: TextStyle(fontSize: textSize, color: textColor)),
             ],
           );
@@ -100,7 +106,7 @@ class AppButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(text, style: TextStyle(fontSize: textSize, color: textColor)),
-              const SizedBox(height: 4),
+              const SizedBox(height: 4), // 사이즈가 달라서 수정 없음
               Icon(icon, size: textSize, color: textColor),
             ],
           );
@@ -114,6 +120,9 @@ class AppButton extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         style: ButtonStyle(
+          // 선택옵션 패딩. 넣지 않으면 미적용
+          padding: MaterialStateProperty.all(contentPadding ?? const EdgeInsets.symmetric(horizontal: 16)),
+
           // 그림자 깊이
           elevation: MaterialStateProperty.all(elevation),
 
