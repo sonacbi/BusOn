@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/text_styles.dart';
 import '../../states/app_state.dart';
+import 'package:bus_on/widgets/buson_logo.dart';
 import 'auth_widget.dart';
 
 import 'package:flutter/services.dart';
@@ -127,8 +128,7 @@ class _AuthScreenState extends State<AuthScreen>
                   height: 60,
                   color: AppColors.primaryColor,
                   alignment: Alignment.center,
-                  child: Text("앱 로고",
-                      style: TextStyles.title.copyWith(color: Colors.white)),
+                  child: BusOnLogo(fontSize: 40, color: Colors.white,),
                 ),
                 Expanded(
                   child: Padding(

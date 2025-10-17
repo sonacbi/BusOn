@@ -5,8 +5,9 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // 메인 오렌지 컬러 (r255 g149 b73)
-  static const primaryColor = Color.fromRGBO(255, 149, 73, 1);
+  // 메인 오렌지 컬러 (0xFFFFB74D, r255 g183 b77) - 레이첼
+  // 메인 오렌지 컬러 (0xFFFD9F28, r253 g159 b40) - 김혜린
+  static const primaryColor = Color.fromRGBO(253, 159, 40, 1);
 
   // 화면 배경
   static const backgroundColor = Color(0xFFF5F5F5);
