@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:bus_on/theme/app_colors.dart';
 import 'package:bus_on/screens/select_language/select_language_screen.dart';
 import 'package:bus_on/widgets/buson_logo.dart';
 
@@ -63,7 +64,7 @@ class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFD9F28),
+      backgroundColor: AppColors.primaryColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

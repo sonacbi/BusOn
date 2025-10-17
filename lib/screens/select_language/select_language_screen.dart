@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import '../test/test_gate_screen.dart';
+import 'package:bus_on/theme/app_colors.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -124,10 +125,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
         height: 110,
         margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFD9F28) : Colors.white,
+          color: isSelected ? AppColors.primaryColor : Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: const Color(0xFFFD9F28), // 버튼 전체 테두리 항상 주황색
+            color: AppColors.primaryColor, // 버튼 전체 테두리 항상 주황색
             width: 2,
           ),
         ),
