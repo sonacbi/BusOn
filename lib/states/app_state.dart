@@ -2,6 +2,7 @@
 // 앱 전반에서 공통으로 관리되는 상태(State)를 정의한 파일
 // (예: 로그인 여부, 사용자 정보, 테마 모드, 언어 설정 등)
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class AppState extends ChangeNotifier {
@@ -11,8 +12,16 @@ class AppState extends ChangeNotifier {
   
   String? selectedCarrier; // 통신사 선택 값
   String loginMethod = "phone"; // 현재 로그인 방식 ("phone" 또는 "email")
-  bool isAuthRequested = false; // 인증 요청 여부
 
+  bool get canResend => !isTimerActive; // 🔹 재요청 가능 여부
+
+  // 인증 타이머 관련
+  Timer? _authTimer;
+  int authSeconds = 180;
+  bool isTimerActive = false;
+
+  // 인증 요청 여부
+  bool isAuthRequested = false;
 
   String? selectedDomain; // 선택된 도메인
 
@@ -35,8 +44,41 @@ class AppState extends ChangeNotifier {
     authController.clear();
     selectedCarrier = null;
     isAuthRequested = false;
+
+    // 🔹 로그인 방식 전환 시 타이머 초기화
+    stopAuthTimer();
+    authSeconds = 180;
+
     notifyListeners();
   }
+
+void startAuthTimer() {
+    if (_authTimer != null) {
+      _authTimer!.cancel();
+    }
+
+    authSeconds = 180; // 3분 제한
+    isTimerActive = true;
+    notifyListeners();
+
+    _authTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (authSeconds <= 0) {
+        timer.cancel();
+        isTimerActive = false;
+        notifyListeners();
+      } else {
+        authSeconds--;
+        notifyListeners();
+      }
+    });
+  }
+
+  void stopAuthTimer() {
+    _authTimer?.cancel();
+    isTimerActive = false;
+    notifyListeners();
+  }
+
 
   // 👉 인증 요청 함수 (백엔드로 전송)
   Future<void> onRequestAuth({

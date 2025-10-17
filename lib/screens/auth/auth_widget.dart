@@ -193,38 +193,23 @@ class AuthCodeField extends StatefulWidget {
 }
 
 class _AuthCodeFieldState extends State<AuthCodeField> {
-  Timer? _timer;
-  int _seconds = 180; // 3분
-  bool _isTimerActive = false;
 
-  void _startTimer() {
-    _timer?.cancel();
-    setState(() {
-      _seconds = 180;
-      _isTimerActive = true;
-    });
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_seconds <= 0) {
-        timer.cancel();
-        setState(() => _isTimerActive = false);
-      } else {
-        setState(() => _seconds--);
-      }
-    });
-  }
 
   void _onResend() {
-    // 재요청 로직
+    // 🔹 인증번호 재요청 로그
     print("인증번호 재요청");
 
-    _startTimer();
+    // 🔹 AppState 타이머 시작
+    widget.appState.startAuthTimer();
+
+    // 🔹 인증 요청
     widget.appState.onRequestAuth(
       selectedDomain: null,
       isCustomDomain: false,
       customDomainController: TextEditingController(),
     );
   }
+
 
   String _formatTime(int seconds) {
     final m = (seconds ~/ 60).toString().padLeft(2, '0');
@@ -234,7 +219,6 @@ class _AuthCodeFieldState extends State<AuthCodeField> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -264,11 +248,15 @@ class _AuthCodeFieldState extends State<AuthCodeField> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
+                    color: widget.appState.isTimerActive
+                        ? Colors.grey.shade300  // 타이머 진행 중 회색
+                        : Colors.orange.shade100, // 재요청 가능 시 주황
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    _isTimerActive ? _formatTime(_seconds) : "재요청",
+                    widget.appState.isTimerActive
+                        ? "${(widget.appState.authSeconds ~/ 60).toString().padLeft(2,'0')}:${(widget.appState.authSeconds % 60).toString().padLeft(2,'0')}"
+                        : "재요청",
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -276,7 +264,7 @@ class _AuthCodeFieldState extends State<AuthCodeField> {
                   icon: const Icon(Icons.refresh, size: 16),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  onPressed: _onResend,
+                  onPressed: widget.appState.canResend ? _onResend : null, // 🔹 타이머 중이면 비활성
                 ),
               ],
             ),
@@ -346,14 +334,18 @@ class AuthActionButton extends StatelessWidget {
                     child: AppButton(
                       text: appState.isAuthRequested ? "로그인하기" : "인증하기",
                       onPressed: isButtonEnabled
-                          ? () {
-                              appState.onRequestAuth(
-                                selectedDomain: selectedDomain,
-                                isCustomDomain: isCustomDomain,
-                                customDomainController: customDomainController,
-                              );
-                            }
-                          : () {},
+                        ? () {
+                            // 인증 요청
+                            appState.onRequestAuth(
+                              selectedDomain: selectedDomain,
+                              isCustomDomain: isCustomDomain,
+                              customDomainController: customDomainController,
+                            );
+
+                            // 타이머 시작
+                            appState.startAuthTimer();
+                        }
+                        : () {},
                       color: isButtonEnabled ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
                       pressedColor: AppColors.buttonActiveColor.withOpacity(0.8),
                       width: MediaQuery.of(context).size.width,
