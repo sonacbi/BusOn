@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:bus_on/screens/select_language/select_language_screen.dart';
+import 'package:bus_on/widgets/buson_logo.dart';
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({super.key});
@@ -32,24 +33,18 @@ class _IntroScreenState extends State<IntroScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'BusOn',
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            BusOnLogo(fontSize: 60, color: Colors.white),
             const SizedBox(height: 10),
-            Text(
+            const Text(
               '환영합니다',
               style: TextStyle(
                 fontSize: 22,
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black87, // 약간 투명 제거
               ),
             ),
           ],
         ),
+
       ),
     );
   }

@@ -58,6 +58,16 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/flags/
+    - assets/fonts/
+  fonts:
+    - family: Bauhaus_93
+      fonts:
+        - asset: assets/fonts/Bauhaus/BAUHS93.ttf
+    - family: Bauhaus
+      fonts:
+        - asset: assets/fonts/Bauhaus/Bauhaus Bold BT.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
