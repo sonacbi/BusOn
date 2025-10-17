@@ -1,74 +1,116 @@
 //  입력창 적용 예시
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Provider 패키지 추가
+
+// 상태 import
+import 'states/app_state.dart';
 import 'widgets/app_input.dart';
+// 테스트용 스크린 import
+import 'screens/intro/intro_screen.dart'; // 01. 앱 실행 시 보여지는 인트로 화면
+import 'screens/select_language/select_language_screen.dart'; // 02. 언어 선택 화면
+import 'screens/auth/auth_screen.dart'; // 03. 로그인/회원가입 화면
+import 'screens/main/main_screen.dart'; // 04. 로그인 후 메인 화면
+import 'screens/test_auth/test_auth_screen.dart'; // ✅ 새로 추가할 테스트용 스크린
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AppState(), // 전역 상태 등록
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text("AppInput Demo")),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 아이디 입력창
-                AppInput(
-                  hintText: "아이디", // 입력찬 안내 문구
-                  controller: nameController, // 외부에서 텍스트 값 가져오기/설정 기능
-                  prefixIcon: const Icon(Icons.person), // 좌 측 아이콘
-                  borderRadius: 12, // 모서리 둥글게
-                  fillColor: Colors.white, // 배경 색
-                  textColor: Colors.black, // 텍스트 색
-                  width: 300, // 입력창 너비
-                  height: 60, // 입력창 높이
-                  fontSize: 18, // 텍스트 크기
-                  shadowColor: Colors.black45, // 그림자 색
-                  shadowBlur: 8.0, // 퍼지는 정도
-                  shadowSpread: 1.0, // 그림자 크기를 늘리거나 줄임
-                  shadowOffset: const Offset(2, 4), // 그림자 x, y축
-                  onChanged: (value) { // 외부에서 변화 감지
-                    print("Name: $value");
-                  },
-                ),
-                const SizedBox(height: 20),
-                // 비밀번호 입력창
-                AppInput(
-                  hintText: "비밀번호",
-                  controller: passwordController,
-                  obscureText: true,
-                  prefixIcon: const Icon(Icons.lock),
-                  borderRadius: 12,
-                  fillColor: Colors.grey[200]!,
-                  textColor: Colors.black,
-                  width: 300,
-                  height: 60,
-                  fontSize: 18,
-                  shadowColor: Colors.black26,
-                  shadowBlur: 6.0,
-                  shadowSpread: 0.0,
-                  shadowOffset: const Offset(0, 3),
-                  onChanged: (value) {
-                    print("Password: $value");
-                  },
-                ),
-              ],
+      title: '테스트용 스크린 이동',
+      home: HomeScreen(), // 앱 시작 시 보여줄 홈 화면
+    );
+  }
+}
+
+// 홈 화면: 테스트용 버튼 4개로 각 스크린 이동
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('테스트용 화면 이동'), // 상단 제목 표시
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20.0), // 화면 가장자리 여백
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // 버튼 세로 중앙 정렬
+          children: [
+            // 01. Intro Screen 버튼
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => IntroScreen()),
+                );
+              },
+              child: Text('01. Intro Screen'),
             ),
-          ),
+            SizedBox(height: 20), // 버튼 사이 간격
+
+            // 02. Select Language Screen 버튼
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SelectLanguageScreen()),
+                );
+              },
+              child: Text('02. Select Language Screen'),
+            ),
+            SizedBox(height: 20),
+
+            // 03. Auth Screen 버튼
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AuthScreen()),
+                );
+              },
+              child: Text('03. Auth Screen'),
+            ),
+            SizedBox(height: 20),
+
+            // 04. Main Screen 버튼
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => MainScreen()),
+                );
+              },
+              child: Text('04. Main Screen'),
+            ),
+
+            SizedBox(height: 20),
+            // 05. test_auth Screen 버튼
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => TestAuthScreen()),
+                );
+              },
+              child: Text('05. test_auth_screen'),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
