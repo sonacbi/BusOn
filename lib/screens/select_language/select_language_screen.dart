@@ -1,14 +1,11 @@
 // 02
 // screens > select_language > select_language_screen
 // 앱 첫 실행 시, 사용자 언어를 선택하는 화면
-
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:flutter/scheduler.dart';
-
-import '../test/test_gate_screen.dart';
 import 'package:bus_on/theme/app_colors.dart';
 import 'package:bus_on/widgets/language_button.dart';
+import '../test/test_gate_screen.dart';
+import '../auth/auth_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -19,16 +16,25 @@ class LanguageSelectionScreen extends StatefulWidget {
 }
 
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
-  String _selectedLanguage = '한국어';
+  String _selectedLanguage = '';
 
-  void _selectLanguage(String lang) {
-    setState(() {
-      _selectedLanguage = lang;
-    });
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text('$lang 선택됨')),
-    // );
-  }
+  // 언어 선택 처리 + 2초 후 다음 화면 이동
+
+void _selectLanguage(String lang) {
+  setState(() {
+    _selectedLanguage = lang;
+  });
+
+  // 2초 후 AuthScreen으로 이동
+  Future.delayed(const Duration(seconds: 2), () {
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => AuthScreen()),
+    );
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +46,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(30, 60, 30, 30),
+          padding: const EdgeInsets.fromLTRB(30, 60, 30, 30), // 상단 여백 충분히 확보
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 상단 텍스트
               Text(
                 '여러분의\n언어를 설정하세요',
                 style: baseTextStyle.copyWith(
@@ -56,26 +63,27 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 'Select a language',
                 style: baseTextStyle.copyWith(
                   fontSize: 26,
-                  color: Color(0xFF8A94A3),
+                  color: const Color(0xFF8A94A3),
                 ),
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 50), // 텍스트와 버튼 사이 간격
 
-              // --- 2x2 언어 선택 버튼 ---
+              // 2x2 버튼 그리드
               Center(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _langButton('한국어', 'assets/flags/kr.png'),
-                        const SizedBox(width: 8), // 기존 16 → 8
+                        const SizedBox(width: 8),
                         _langButton('English', 'assets/flags/us.png'),
                       ],
                     ),
-                    const SizedBox(height: 8), // 기존 16 → 8
+                    const SizedBox(height: 8),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _langButton('中文', 'assets/flags/cn.png'),
                         const SizedBox(width: 8),
@@ -86,10 +94,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                 ),
               ),
 
+              const Spacer(), // 버튼 그리드와 하단 버튼 사이 공간
 
-              const Spacer(),
-
-              // --- 테스트 페이지 이동 버튼 ---
+              // 테스트 페이지 버튼
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
@@ -112,14 +119,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
             ],
           ),
         ),
+
       ),
     );
   }
 
-  // ------------------------
-  // 국기 + 텍스트 버튼
-  // ------------------------
-    Widget _langButton(String lang, String flagPath) {
+  Widget _langButton(String lang, String flagPath) {
     return LanguageButton(
       lang: lang,
       flagPath: flagPath,
@@ -127,5 +132,4 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
       onSelect: () => _selectLanguage(lang),
     );
   }
-
 }
