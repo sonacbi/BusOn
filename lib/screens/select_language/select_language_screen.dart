@@ -78,20 +78,18 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        _langButton('한국어', 'assets/flags/kr.png'),
+                        Expanded(child: _langButton('한국어', 'assets/flags/kr.png')),
                         const SizedBox(width: 8),
-                        _langButton('English', 'assets/flags/us.png'),
+                        Expanded(child: _langButton('English', 'assets/flags/us.png')),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        _langButton('中文', 'assets/flags/cn.png'),
+                        Expanded(child: _langButton('中文', 'assets/flags/cn.png')),
                         const SizedBox(width: 8),
-                        _langButton('日本語', 'assets/flags/jp.png'),
+                        Expanded(child: _langButton('日本語', 'assets/flags/jp.png')),
                       ],
                     ),
                   ],

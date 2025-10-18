@@ -87,11 +87,11 @@ class _LanguageButtonState extends State<LanguageButton> with TickerProviderStat
     // 눌림 밝기 애니메이션
     _pressedController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 400),
     );
     _pressedColorAnimation = ColorTween(
       begin: Colors.white,
-      end: AppColors.primaryColor.withOpacity(0.4),
+      end: AppColors.primaryColor.withOpacity(0.9),
     ).animate(_pressedController);
 
     // 선택 후 배경 반짝임

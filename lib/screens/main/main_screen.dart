@@ -368,31 +368,35 @@ class MainScreen extends StatelessWidget {
           const Spacer(),
         ],
       ),
-      bottomNavigationBar: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        child: Row(
-          children: [
-            Expanded(
-              child: AppButton(
-                text: "충전하기",
-                onPressed: () => print("충전하기 클릭"),
-                color: AppColors.primaryColor,
-                pressedColor: AppColors.primaryColor.withOpacity(0.8),
+      bottomNavigationBar: SafeArea(
+        top: false, // 상단은 건드리지 않음
+        child: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  text: "충전하기",
+                  onPressed: () => print("충전하기 클릭"),
+                  color: AppColors.primaryColor,
+                  pressedColor: AppColors.primaryColor.withOpacity(0.8),
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: AppButton(
-                text: "결제하기",
-                onPressed: () => print("결제하기 클릭"),
-                color: Colors.orange.shade600,
-                pressedColor: Colors.orange.shade700,
+              const SizedBox(width: 16),
+              Expanded(
+                child: AppButton(
+                  text: "결제하기",
+                  onPressed: () => print("결제하기 클릭"),
+                  color: Colors.orange.shade600,
+                  pressedColor: Colors.orange.shade700,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+
     );
   }
 }

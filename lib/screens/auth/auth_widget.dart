@@ -82,7 +82,8 @@ class AuthInputField extends StatelessWidget {
     if (appState.loginMethod == "email") {
       return Row(
         children: [
-          Expanded(
+          Flexible(
+            flex: 1,
             child: AppInput(
               focusNode: idFocus,
               controller: appState.phoneController,
@@ -90,60 +91,74 @@ class AuthInputField extends StatelessWidget {
               hintText: "example",
             ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
+          const SizedBox(width: 6), // 여백 조금 줄임
+          Flexible(
+            flex: 1,
             child: isCustomDomain
                 ? AppInput(
-                    focusNode: customDomainFocus,
-                    controller: customDomainController,
-                    labelText: "도메인 입력",
-                    hintText: "example.com",
-                    onChanged: (val) {
-                      if (val.isEmpty && !customDomainFocus.hasFocus) return;
-                      if (val.isEmpty) {
-                        setCustomDomain(false);
-                        Future.microtask(() => idFocus.requestFocus());
-                      }
+              focusNode: customDomainFocus,
+              controller: customDomainController,
+              labelText: "도메인 입력",
+              hintText: "example.com",
+              contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10), // padding 최소화
+              onChanged: (val) {
+                if (val.isEmpty && !customDomainFocus.hasFocus) return;
+                if (val.isEmpty) {
+                  setCustomDomain(false);
+                  Future.microtask(() => idFocus.requestFocus());
+                }
 
-                      String domainText = isCustomDomain
-                          ? customDomainController.text
-                          : (selectedDomain ?? "");
-                      if (appState.phoneController.text.isNotEmpty && domainText.isNotEmpty) {
-                        setShowAuthField(true);
-                      } else {
-                        setShowAuthField(false);
-                      }
-                    },
-                  )
+                String domainText = isCustomDomain
+                    ? customDomainController.text
+                    : (selectedDomain ?? "");
+                if (appState.phoneController.text.isNotEmpty && domainText.isNotEmpty) {
+                  setShowAuthField(true);
+                } else {
+                  setShowAuthField(false);
+                }
+              },
+            )
                 : DropdownButtonFormField<String>(
-                    value: selectedDomain,
-                    decoration: const InputDecoration(
-                      labelText: "도메인",
-                      border: OutlineInputBorder(),
-                    ),
-                    items: [
-                      "gmail.com", "naver.com", "daum.net",
-                      "hanmail.net", "kakao.com", "hotmail.com",
-                      "outlook.com", "yahoo.com", "icloud.com",
-                      "직접입력"
-                    ].map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(e),
-                        )).toList(),
-                    onChanged: (val) {
-                      if (val == "직접입력") {
-                        setCustomDomain(true);
-                        Future.microtask(() => customDomainFocus.requestFocus());
-                      } else {
-                        setCustomDomain(false);
-                        setSelectedDomain(val);
-                      }
-                    },
-                  ),
+              value: selectedDomain,
+              decoration: InputDecoration(
+                labelText: "도메인",
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10), // padding 최소화
+              ),
+              items: [
+                "gmail.com",
+                "naver.com",
+                "daum.net",
+                "hanmail.net",
+                "kakao.com",
+                "hotmail.com",
+                "outlook.com",
+                "yahoo.com",
+                "icloud.com",
+                "직접입력"
+              ].map((e) => DropdownMenuItem(
+                value: e,
+                child: Text(
+                  e,
+                  overflow: TextOverflow.ellipsis, // 긴 텍스트 잘림 방지
+                ),
+              )).toList(),
+              onChanged: (val) {
+                if (val == "직접입력") {
+                  setCustomDomain(true);
+                  Future.microtask(() => customDomainFocus.requestFocus());
+                } else {
+                  setCustomDomain(false);
+                  setSelectedDomain(val);
+                }
+              },
+            ),
           ),
         ],
       );
-    } else {
+    }
+
+   else {
       return Column(
         children: [
           AppInput(
