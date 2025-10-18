@@ -123,13 +123,39 @@ class _AuthScreenState extends State<AuthScreen>
           children: [
             Column(
               children: [
-                // 상단바
-                Container(
-                  height: 60,
-                  color: AppColors.primaryColor,
-                  alignment: Alignment.center,
-                  child: BusOnLogo(fontSize: 40, color: Colors.white,),
+              // 상단바
+              Container(
+                height: 60,
+                color: AppColors.primaryColor,
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center, // <-- 가운데 정렬
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    BusOnLogo(fontSize: 40, color: Colors.white),
+                    const SizedBox(width: 12),
+                    // 선택 언어 표시
+                    if (appState.selectedLanguage != null &&
+                        appState.selectedLanguage!.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          appState.selectedLanguage!,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+              ),
+
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(40.0),

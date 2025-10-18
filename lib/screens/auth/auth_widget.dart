@@ -7,6 +7,7 @@ import '../../states/app_state.dart';
 import '../../utils/ui_helper.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_input.dart';
+import '../main/main_screen.dart';
 
 class AuthHeader extends StatelessWidget {
   final String loginMethod; // "phone" 또는 "email"
@@ -334,18 +335,26 @@ class AuthActionButton extends StatelessWidget {
                     child: AppButton(
                       text: appState.isAuthRequested ? "로그인하기" : "인증하기",
                       onPressed: isButtonEnabled
-                        ? () {
-                            // 인증 요청
-                            appState.onRequestAuth(
-                              selectedDomain: selectedDomain,
-                              isCustomDomain: isCustomDomain,
-                              customDomainController: customDomainController,
-                            );
+                      ? () {
+                          // 🔹 테스트용: 바로 메인 화면으로 이동
+                          print("로그인 버튼 눌림, 메인 화면으로 이동");
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => MainScreen()),
+                          );
 
-                            // 타이머 시작
-                            appState.startAuthTimer();
+                          // 🔹 실제 인증 요청/타이머 코드도 필요하면 아래 주석 해제
+                          /*
+                          appState.onRequestAuth(
+                            selectedDomain: selectedDomain,
+                            isCustomDomain: isCustomDomain,
+                            customDomainController: customDomainController,
+                          );
+                          appState.startAuthTimer();
+                          */
                         }
-                        : () {},
+                      : () {},
+
                       color: isButtonEnabled ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
                       pressedColor: AppColors.buttonActiveColor.withOpacity(0.8),
                       width: MediaQuery.of(context).size.width,

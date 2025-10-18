@@ -2,6 +2,8 @@
 // screens > select_language > select_language_screen
 // 앱 첫 실행 시, 사용자 언어를 선택하는 화면
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; 
+import '../../states/app_state.dart'; 
 import 'package:bus_on/theme/app_colors.dart';
 import 'package:bus_on/widgets/language_button.dart';
 import '../test/test_gate_screen.dart';
@@ -19,21 +21,23 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   String _selectedLanguage = '';
 
   // 언어 선택 처리 + 2초 후 다음 화면 이동
+  void _selectLanguage(String lang) {
+    setState(() {
+      _selectedLanguage = lang;
+    });
 
-void _selectLanguage(String lang) {
-  setState(() {
-    _selectedLanguage = lang;
-  });
+    final appState = Provider.of<AppState>(context, listen: false);
+    appState.setLanguage(lang);
 
-  // 2초 후 AuthScreen으로 이동
-  Future.delayed(const Duration(seconds: 2), () {
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => AuthScreen()),
-    );
-  });
-}
+    // 2초 후 AuthScreen으로 이동
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => AuthScreen()),
+      );
+    });
+  }
 
 
   @override

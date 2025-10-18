@@ -15,6 +15,9 @@ class AppState extends ChangeNotifier {
 
   bool get canResend => !isTimerActive; // 🔹 재요청 가능 여부
 
+  // 🔹 새로 추가: 선택 언어
+  String? selectedLanguage;
+
   // 인증 타이머 관련
   Timer? _authTimer;
   int authSeconds = 180;
@@ -52,9 +55,16 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-void startAuthTimer() {
-    if (_authTimer != null) {
-      _authTimer!.cancel();
+  // 🔹 선택 언어 설정 함수
+  void setLanguage(String lang) {
+    selectedLanguage = lang;
+    print("🟢 선택된 언어: $lang"); // 콘솔 로그
+    notifyListeners();
+  }
+
+    void startAuthTimer() {
+      if (_authTimer != null) {
+        _authTimer!.cancel();
     }
 
     authSeconds = 180; // 3분 제한
