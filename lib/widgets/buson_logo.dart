@@ -131,7 +131,7 @@ class _AnimatedOWithMarkerState extends State<AnimatedOWithMarker> with SingleTi
     // O 글자 Fade + Scale
     _fadeO = Tween<double>(begin: 0.0, end: 1.0).animate(
         CurvedAnimation(parent: _controller, curve: const Interval(0.7, 1.0, curve: Curves.easeOut)));
-    _scaleO = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _scaleO = Tween<double>(begin: 0.0, end: 1.1).animate(
         CurvedAnimation(parent: _controller, curve: const Interval(0.7, 1.0, curve: Curves.elasticOut)));
 
     _controller.forward();

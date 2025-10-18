@@ -3,8 +3,12 @@
 // 앱 첫 실행 시, 사용자 언어를 선택하는 화면
 
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/scheduler.dart';
+
 import '../test/test_gate_screen.dart';
 import 'package:bus_on/theme/app_colors.dart';
+import 'package:bus_on/widgets/language_button.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -21,9 +25,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     setState(() {
       _selectedLanguage = lang;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$lang 선택됨')),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('$lang 선택됨')),
+    // );
   }
 
   @override
@@ -115,59 +119,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   // ------------------------
   // 국기 + 텍스트 버튼
   // ------------------------
-  Widget _langButton(String lang, String flagPath) {
-    final bool isSelected = _selectedLanguage == lang;
-
-    return GestureDetector(
-      onTap: () => _selectLanguage(lang),
-      child: Container(
-        width: 150,
-        height: 110,
-        margin: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: AppColors.primaryColor, // 버튼 전체 테두리 항상 주황색
-            width: 2,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 내부 회색 테두리 (선택 안 되었을 때만)
-            Container(
-              decoration: BoxDecoration(
-                border: isSelected
-                    ? null
-                    : Border.all(
-                        color: Colors.grey.shade300,
-                        width: 1.2,
-                      ),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.asset(
-                  flagPath,
-                  width: 50,
-                  height: 35,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              lang,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
+    Widget _langButton(String lang, String flagPath) {
+    return LanguageButton(
+      lang: lang,
+      flagPath: flagPath,
+      isSelected: _selectedLanguage == lang,
+      onSelect: () => _selectLanguage(lang),
     );
   }
 
