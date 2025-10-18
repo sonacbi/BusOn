@@ -38,11 +38,24 @@ class TestGateScreen extends StatelessWidget {
               child: const Text('03. Test Auth Screen'),
             ),
             const SizedBox(height: 10),
+            // ✅ MainScreen 테스트 진입 (임시 유저 정보)
             ElevatedButton(
-              onPressed: () => Navigator.push(
+              onPressed: () {
+                // 🔹 TODO: 나중에 백엔드에서 실제 로그인된 사용자 정보로 교체
+                const dummyUserName = "임시사용자";
+                const dummyCharge = 5000; // 테스트용 충전 금액
+
+                Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => MainScreen())),
-              child: const Text('04. Main Screen'),
+                  MaterialPageRoute(
+                    builder: (_) => MainScreen(
+                      userName: dummyUserName,
+                      chargeAmount: dummyCharge,
+                    ),
+                  ),
+                );
+              },
+              child: const Text("03. Main Screen (임시 데이터)"),
             ),
           ],
         ),

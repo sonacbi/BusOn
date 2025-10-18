@@ -334,27 +334,37 @@ class AuthActionButton extends StatelessWidget {
                     width: MediaQuery.of(context).size.width,
                     child: AppButton(
                       text: appState.isAuthRequested ? "로그인하기" : "인증하기",
-                      onPressed: isButtonEnabled
-                          ? () {
-                              if (appState.isAuthRequested) {
-                                // 🔹 로그인하기 상태일 때만 메인 화면으로 이동
-                                print("로그인 버튼 눌림, 메인 화면으로 이동");
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => MainScreen()),
-                                );
-                              } else {
-                                // 🔹 인증하기 상태일 때만 인증 요청/타이머 실행
-                                print("인증 요청 실행");
-                                appState.onRequestAuth(
-                                  selectedDomain: selectedDomain,
-                                  isCustomDomain: isCustomDomain,
-                                  customDomainController: customDomainController,
-                                );
-                                appState.startAuthTimer();
+                        onPressed: isButtonEnabled
+                            ? () {
+                                if (appState.isAuthRequested) {
+                                  // 🔹 로그인하기 상태일 때만 메인 화면으로 이동
+                                  print("✅ 로그인 버튼 눌림 → 메인 화면으로 이동");
+
+                                  // 🔹 TODO: 백엔드 연동 후 실제 사용자 정보로 교체 예정
+                                  const dummyUserName = "임시사용자";
+                                  const dummyChargeAmount = 5000;
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => MainScreen(
+                                        userName: dummyUserName,
+                                        chargeAmount: dummyChargeAmount,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  // 🔹 인증하기 상태일 때만 인증 요청/타이머 실행
+                                  print("🔸 인증 요청 실행");
+                                  appState.onRequestAuth(
+                                    selectedDomain: selectedDomain,
+                                    isCustomDomain: isCustomDomain,
+                                    customDomainController: customDomainController,
+                                  );
+                                  appState.startAuthTimer();
+                                }
                               }
-                            }
-                          : () {},
+                            : () {},
                       color: isButtonEnabled ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
                       pressedColor: AppColors.buttonActiveColor.withOpacity(0.8),
                       width: MediaQuery.of(context).size.width,
