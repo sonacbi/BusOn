@@ -335,26 +335,26 @@ class AuthActionButton extends StatelessWidget {
                     child: AppButton(
                       text: appState.isAuthRequested ? "로그인하기" : "인증하기",
                       onPressed: isButtonEnabled
-                      ? () {
-                          // 🔹 테스트용: 바로 메인 화면으로 이동
-                          print("로그인 버튼 눌림, 메인 화면으로 이동");
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => MainScreen()),
-                          );
-
-                          // 🔹 실제 인증 요청/타이머 코드도 필요하면 아래 주석 해제
-                          /*
-                          appState.onRequestAuth(
-                            selectedDomain: selectedDomain,
-                            isCustomDomain: isCustomDomain,
-                            customDomainController: customDomainController,
-                          );
-                          appState.startAuthTimer();
-                          */
-                        }
-                      : () {},
-
+                          ? () {
+                              if (appState.isAuthRequested) {
+                                // 🔹 로그인하기 상태일 때만 메인 화면으로 이동
+                                print("로그인 버튼 눌림, 메인 화면으로 이동");
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => MainScreen()),
+                                );
+                              } else {
+                                // 🔹 인증하기 상태일 때만 인증 요청/타이머 실행
+                                print("인증 요청 실행");
+                                appState.onRequestAuth(
+                                  selectedDomain: selectedDomain,
+                                  isCustomDomain: isCustomDomain,
+                                  customDomainController: customDomainController,
+                                );
+                                appState.startAuthTimer();
+                              }
+                            }
+                          : () {},
                       color: isButtonEnabled ? AppColors.buttonActiveColor : AppColors.buttonDisabledColor,
                       pressedColor: AppColors.buttonActiveColor.withOpacity(0.8),
                       width: MediaQuery.of(context).size.width,
