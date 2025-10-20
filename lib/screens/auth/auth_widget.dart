@@ -125,6 +125,7 @@ class AuthInputField extends StatelessWidget {
                 border: const OutlineInputBorder(),
                 contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10), // padding 최소화
               ),
+              isExpanded: true,
               items: [
                 "gmail.com",
                 "naver.com",
