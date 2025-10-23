@@ -28,19 +28,19 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       // 상단바 교체
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70),
-        child: Container(
-          color: AppColors.primaryColor,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              BusOnLogo(fontSize: 24, color: Colors.white),
-              Icon(Icons.menu, color: Colors.white, size: 28),
-            ],
-          ),
+      appBar: AppBar(
+        backgroundColor: AppColors.primaryColor,
+        toolbarHeight: 70, // 내부 컨텐츠 높이
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            BusOnLogo(fontSize: 24, color: Colors.white),
+            Icon(Icons.menu, color: Colors.white, size: 28),
+          ],
         ),
+        automaticallyImplyLeading: false, // 기본 뒤로가기 버튼 제거
       ),
+
 
 
       body: LayoutBuilder(
@@ -78,7 +78,7 @@ class MainScreen extends StatelessWidget {
           final double icCenterY = icTop + icHeight / 2;
 
           // 하드코딩 오프셋 (원래 기준)
-          final double offsetTop = -40 / cardHeight;
+          final double offsetTop = -30 / cardHeight;
           final double offsetRight = -12 / cardWidth;
 
           // 스케일 적용 전 위치 계산
