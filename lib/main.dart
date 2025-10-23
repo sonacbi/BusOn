@@ -1,11 +1,11 @@
-//  입력창 적용 예시
+// 레이아웃 상단바, 바디, 하단바
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Provider 패키지 추가
 
 // 상태 import
 import 'states/app_state.dart';
-import 'widgets/app_input.dart';
+import 'theme/app_theme.dart';
 
 // 테스트용 스크린 import
 import 'package:bus_on/screens/intro/intro_screen.dart'; // 01. 앱 실행 시 보여지는 인트로 화면
