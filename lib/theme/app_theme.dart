@@ -26,7 +26,8 @@ class AppTheme {
 class AppThemeLayout extends StatelessWidget {
   final String topBarTitle;
   final Widget body;
-  final Widget? bottomBar;
+  final Widget? topBar; // 상단바 직접 교체용
+  final Widget? bottomBar; // 하단바 직접 교체용
   final Color topBarColor;
   final double topBarHeight;
   final Color bottomBarColor;
@@ -36,6 +37,7 @@ class AppThemeLayout extends StatelessWidget {
     super.key,
     required this.topBarTitle,
     required this.body,
+    this.topBar,
     this.bottomBar,
     this.topBarColor = Colors.blue,
     this.topBarHeight = 60,

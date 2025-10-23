@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/app_button.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/buson_logo.dart';
+import '../../theme/app_theme.dart';
 
 class MainScreen extends StatelessWidget {
   final String userName;
@@ -26,17 +27,21 @@ class MainScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryColor,
-        elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            BusOnLogo(fontSize: 24, color: Colors.white),
-            Icon(Icons.menu, color: Colors.white, size: 28),
-          ],
+      // 상단바 교체
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(70),
+        child: Container(
+          color: AppColors.primaryColor,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              BusOnLogo(fontSize: 24, color: Colors.white),
+              Icon(Icons.menu, color: Colors.white, size: 28),
+            ],
+          ),
         ),
       ),
+
 
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -461,32 +466,64 @@ class MainScreen extends StatelessWidget {
 
       bottomNavigationBar: SafeArea(
         top: false,
-        child: Container(
-          color: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  text: "충전하기",
-                  onPressed: () => print("충전하기 클릭"),
-                  color: AppColors.primaryColor,
-                  pressedColor: AppColors.primaryColor.withOpacity(0.8),
-                ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 충전/결제 버튼
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      text: "충전하기",
+                      onPressed: () => print("충전하기 클릭"),
+                      color: AppColors.primaryColor,
+                      pressedColor: AppColors.primaryColor.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: AppButton(
+                      text: "결제하기",
+                      onPressed: () => print("결제하기 클릭"),
+                      color: Colors.orange.shade600,
+                      pressedColor: Colors.orange.shade700,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AppButton(
-                  text: "결제하기",
-                  onPressed: () => print("결제하기 클릭"),
-                  color: Colors.orange.shade600,
-                  pressedColor: Colors.orange.shade700,
-                ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // 하단바 아이콘
+            Container(
+              height: 60,
+              color: AppColors.primaryColor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.home, color: Colors.white),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.search, color: Colors.white),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.settings, color: Colors.white),
+                    onPressed: () {},
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+
     );
   }
 }
